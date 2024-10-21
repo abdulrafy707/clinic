@@ -1,0 +1,29 @@
+{
+  "name": "clinscibe",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.21.1",
+    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "formidable": "^3.5.2",
+    "next": "14.2.15",
+    "next-auth": "^4.24.8",
+    "nodemailer": "^6.9.15",
+    "openai": "^4.68.1",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "postcss": "^8",
+    "prisma": "^5.21.1",
+    "tailwindcss": "^3.4.1"
+  }
+}
