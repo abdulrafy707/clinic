@@ -1,26 +1,52 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 export default function Home() {
   const [result, setResult] = useState(null);
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioChunks, setAudioChunks] = useState([]);
-  const [uploadedFile, setUploadedFile] = useState(null); // Added state for uploaded file
+  const [uploadedFile, setUploadedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState(''); // Field for user ID
-  const [patientName, setPatientName] = useState(''); // Field for patient name
-  const [patientAddress, setPatientAddress] = useState(''); // Field for patient address
-  const audioRef = useRef(null); // Reference to the audio element for playback
+  const [patientName, setPatientName] = useState('');
+  const [patientAddress, setPatientAddress] = useState('');
+  const [templates, setTemplates] = useState([]);
+  const audioRef = useRef(null);
+
+  // Predefined doctorId and templateId for testing
+  const doctorId = '1';
+  const selectedTemplateId = '1';
+
+  // Fetch templates for the doctor on component mount
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const response = await fetch(`/api/templates?doctorId=${doctorId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          setTemplates(data.templates);
+        } else {
+          setError(data.error || 'Failed to fetch templates.');
+        }
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        setError('Failed to fetch templates.');
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   // Function to start recording
   const handleStartRecording = async () => {
     setError(null);
-    setUploadedFile(null); // Clear any uploaded file when recording starts
+    setUploadedFile(null);
 
-    if (!userId) {
-      setError('Please enter your User ID before recording.');
+    if (!doctorId || !selectedTemplateId) {
+      setError('Doctor ID or template ID is missing.');
       return;
     }
 
@@ -29,7 +55,7 @@ export default function Home() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const media = new MediaRecorder(stream, {
           mimeType: 'audio/webm;codecs=opus',
-          audioBitsPerSecond: 128000, // Higher bitrate for better quality
+          audioBitsPerSecond: 128000,
         });
         setMediaRecorder(media);
         setAudioChunks([]);
@@ -66,15 +92,14 @@ export default function Home() {
     }
   };
 
-  // Function to handle file upload from device
+  // Function to handle file upload
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       setUploadedFile(file);
-      setAudioChunks([]); // Clear any existing recorded audio
+      setAudioChunks([]);
       setError(null);
 
-      // For playback (optional)
       const audioUrl = URL.createObjectURL(file);
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
@@ -83,17 +108,15 @@ export default function Home() {
     }
   };
 
-  // Function to upload the recorded audio or uploaded file
+  // Function to upload audio
   const handleUpload = async () => {
     let audioBlob;
     let filename;
 
     if (uploadedFile) {
-      // If a file has been uploaded from the device
       audioBlob = uploadedFile;
       filename = uploadedFile.name;
     } else if (audioChunks.length > 0) {
-      // If audio has been recorded
       audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
       filename = 'recording.webm';
     } else {
@@ -105,9 +128,10 @@ export default function Home() {
 
     const formData = new FormData();
     formData.append('file', audioBlob, filename);
-    formData.append('userId', userId);
+    formData.append('userId', doctorId); // Use predefined doctorId
     formData.append('patientName', patientName || '');
     formData.append('patientAddress', patientAddress || '');
+    formData.append('templateId', selectedTemplateId); // Use predefined templateId
 
     setLoading(true);
     setError(null);
@@ -123,7 +147,7 @@ export default function Home() {
       if (response.ok) {
         console.log('Received transcription length:', data.transcription.length);
         setResult(data);
-        console.log('Transcription and summary received:', data);
+        console.log('Transcription and formatted output received:', data);
       } else {
         console.error('Error from server:', data);
         setError(data.error || 'Error uploading the audio.');
@@ -141,17 +165,6 @@ export default function Home() {
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-4">Record or Upload Audio for Transcription</h1>
-
-      <div className="mb-4">
-        <label className="block mb-2">User ID</label>
-        <input
-          type="text"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          className="border p-2 rounded w-full"
-          placeholder="Enter user ID"
-        />
-      </div>
 
       <div className="mb-4">
         <label className="block mb-2">Patient Name (Optional)</label>
@@ -175,7 +188,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Options to record or upload */}
       <div className="mb-4">
         <h2 className="text-xl font-semibold mb-2">Choose an option:</h2>
         <div className="flex items-center mb-2">
@@ -232,8 +244,28 @@ export default function Home() {
             className="w-full border p-2 rounded"
           />
 
-          <h3 className="mt-4 font-semibold">Summary:</h3>
-          <p>{result.summary}</p>
+          <h3 className="mt-4 font-semibold">Formatted Output:</h3>
+          <div className="prose prose-lg">
+            <ReactMarkdown>{result.formattedOutput}</ReactMarkdown>
+          </div>
+
+          <h3 className="mt-4 font-semibold">Subjective:</h3>
+          <p>{result.subjective}</p>
+
+          <h3 className="mt-4 font-semibold">Objective:</h3>
+          <ul>
+            {Object.entries(result.objective).map(([key, value]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {value}
+              </li>
+            ))}
+          </ul>
+
+          <h3 className="mt-4 font-semibold">Assessment:</h3>
+          <p>{result.assessment}</p>
+
+          <h3 className="mt-4 font-semibold">Plan:</h3>
+          <p>{result.plan}</p>
         </div>
       )}
     </div>

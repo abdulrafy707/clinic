@@ -8,41 +8,155 @@ datasource db {
 }
 
 model User {
-  id                      Int      @id @default(autoincrement())
-  name                    String
-  email                   String   @unique
-  phone                   String   @unique
-  city                    String
-  state                   String
-  country                 String
-  address                 String
-  password                String
-  role                    Role     @default(DOCTOR)
-  isEmailVerified         Boolean  @default(true)
-  verificationToken       String?  @unique
+  id                       Int                  @id @default(autoincrement())
+  name                     String
+  email                    String               @unique
+  phone                    String               @unique
+  city                     String
+  state                    String
+  country                  String
+  address                  String
+  password                 String
+  role                     Role                 @default(DOCTOR)
+  isEmailVerified          Boolean              @default(true)
+  verificationToken        String?              @unique
   verificationTokenExpires DateTime?
-  resetToken              String?  @unique
-  resetTokenExpires       DateTime?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-  transcriptions          Transcription[] // Relation to Transcription model
+  resetToken               String?              @unique
+  resetTokenExpires        DateTime?
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  transcriptions           Transcription[]
+  hospitals                Hospital[]           // Implicit many-to-many relation
+  patients                 Patient[]            @relation("DoctorPatients")
+  feedbacks                Feedback[] 
+  objectiveTemplates       ObjectiveTemplate[]  // Relation to ObjectiveTemplate model
+  subscriptions            Subscription[]       // Link to subscriptions
+  status                   String               @default("active")
+}
+
+model Admin {
+  id                       Int                  @id @default(autoincrement())
+  name                     String
+  email                    String               @unique
+  phone                    String               @unique
+  password                 String
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  objectiveTemplates       ObjectiveTemplate[]  // Relation to ObjectiveTemplate for templates created by admin
+}
+
+model Hospital {
+  id                       Int                  @id @default(autoincrement())
+  name                     String
+  address                  String
+  city                     String
+  state                    String
+  country                  String
+  phone                    String
+  email                    String               @unique
+  users                    User[]               // Implicit many-to-many relation
+  feedbacks                Feedback[] 
+  subscriptions            Subscription[]       // Link to subscriptions
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  status                   String               @default("active")
+}
+
+model Patient {
+  id                       Int                  @id @default(autoincrement())
+  name                     String
+  address                  String
+  phone                    String
+  email                    String?
+  city                     String
+  state                    String
+  country                  String
+  doctorId                 Int
+  doctor                   User                 @relation("DoctorPatients", fields: [doctorId], references: [id])
+  transcriptions           Transcription[]
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
 }
 
 model Transcription {
-  id              Int      @id @default(autoincrement())
-  filename        String
-  transcription   String
-  summary         String
-  patientName     String?  // Nullable field for patient name
-  patientAddress  String?  // Nullable field for patient address
-  userId          Int      // Foreign key to the User model
-  user            User     @relation(fields: [userId], references: [id])
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                       Int                  @id @default(autoincrement())
+  filename                 String
+  transcription            String
+  subjective               String?
+  objective                String?
+  assessment               String?
+  plan                     String?
+  patientId                Int?
+  patient                  Patient?             @relation(fields: [patientId], references: [id])
+  patientName              String?
+  patientAddress           String?
+  userId                   Int                  // Foreign key to User (Doctor)
+  user                     User                 @relation(fields: [userId], references: [id])
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  templateId               Int?
+  template                 ObjectiveTemplate?   @relation("ObjectiveTemplateTranscriptions", fields: [templateId], references: [id])
+}
+
+model ObjectiveTemplate {
+  id                       Int                  @id @default(autoincrement())
+  name                     String               // Name of the template, e.g., "General Checkup"
+  categories               Json                 // JSON array to store categories like ["Temperature", "Eyes", "Ears"]
+  doctorId                 Int?                 // Optional link to a specific doctor
+  adminId                  Int?                 // Optional link to a specific admin
+  doctor                   User?                @relation(fields: [doctorId], references: [id])
+  admin                    Admin?               @relation(fields: [adminId], references: [id])
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  transcriptions           Transcription[]      @relation("ObjectiveTemplateTranscriptions")
+}
+
+model Feedback {
+  id                       Int                  @id @default(autoincrement())
+  userId                   Int                  // Foreign key to User
+  user                     User                 @relation(fields: [userId], references: [id])
+  hospitalId               Int                  // Foreign key to Hospital
+  hospital                 Hospital             @relation(fields: [hospitalId], references: [id])
+  name                     String               // Name of the user giving feedback
+  message                  String               // Feedback message, unlimited length
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+}
+
+model PricingPlan {
+  id                       Int                  @id @default(autoincrement())
+  name                     String               // Plan name, e.g., "Student/Intern", "Monthly", "Yearly"
+  description              String               // Short description of the plan
+  price                    Float                // Price of the plan
+  billingCycle             BillingCycle         // Enum for billing cycle, e.g., monthly or yearly
+  features                 Json                 // JSON array for features (e.g., ["Unlimited free Medical Records", "Stellar support"])
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  subscriptions            Subscription[]       // Link to subscriptions
+}
+
+model Subscription {
+  id                       Int                  @id @default(autoincrement())
+  userId                   Int?                 // Optional: If subscribed by a user (doctor)
+  user                     User?                @relation(fields: [userId], references: [id])
+  hospitalId               Int?                 // Optional: If subscribed by a hospital
+  hospital                 Hospital?            @relation(fields: [hospitalId], references: [id])
+  planId                   Int                  // The PricingPlan they subscribed to
+  plan                     PricingPlan          @relation(fields: [planId], references: [id])
+  startDate                DateTime             @default(now()) // Start date of subscription
+  endDate                  DateTime?            // Optional end date for fixed-duration subscriptions
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
 }
 
 enum Role {
   ADMIN
   DOCTOR
   MANAGER
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+  ONE_TIME
 }
