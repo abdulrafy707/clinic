@@ -124,30 +124,36 @@ model Feedback {
 }
 
 model PricingPlan {
-  id                       Int                  @id @default(autoincrement())
-  name                     String               // Plan name, e.g., "Student/Intern", "Monthly", "Yearly"
-  description              String               // Short description of the plan
-  price                    Float                // Price of the plan
-  billingCycle             BillingCycle         // Enum for billing cycle, e.g., monthly or yearly
-  features                 Json                 // JSON array for features (e.g., ["Unlimited free Medical Records", "Stellar support"])
-  createdAt                DateTime             @default(now())
-  updatedAt                DateTime             @updatedAt
-  subscriptions            Subscription[]       // Link to subscriptions
+  id              Int             @id @default(autoincrement())
+  name            String          // Plan name, e.g., "Student/Intern", "Monthly", "Yearly"
+  description     String          // Short description of the plan
+  price           Float           // Price of the plan
+  billingCycle    BillingCycle    // Enum for billing cycle, e.g., monthly or yearly
+  features        Json            // JSON array for features (e.g., ["Unlimited free Medical Records", "Stellar support"])
+  perDoctor       Boolean         @default(false) // New field: Set to true if this plan is billed per doctor within a hospital
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  subscriptions   Subscription[]  // Link to subscriptions
 }
 
 model Subscription {
-  id                       Int                  @id @default(autoincrement())
-  userId                   Int?                 // Optional: If subscribed by a user (doctor)
-  user                     User?                @relation(fields: [userId], references: [id])
-  hospitalId               Int?                 // Optional: If subscribed by a hospital
-  hospital                 Hospital?            @relation(fields: [hospitalId], references: [id])
-  planId                   Int                  // The PricingPlan they subscribed to
-  plan                     PricingPlan          @relation(fields: [planId], references: [id])
-  startDate                DateTime             @default(now()) // Start date of subscription
-  endDate                  DateTime?            // Optional end date for fixed-duration subscriptions
-  createdAt                DateTime             @default(now())
-  updatedAt                DateTime             @updatedAt
+  id              Int             @id @default(autoincrement())
+  userId          Int?            // Optional: If subscribed by a user (doctor)
+  user            User?           @relation(fields: [userId], references: [id])
+  hospitalId      Int?            // Optional: If subscribed by a hospital
+  hospital        Hospital?       @relation(fields: [hospitalId], references: [id])
+  planId          Int             // The PricingPlan they subscribed to
+  plan            PricingPlan     @relation(fields: [planId], references: [id])
+  startDate       DateTime        @default(now()) // Start date of subscription
+  endDate         DateTime?       // Optional end date for fixed-duration subscriptions
+  isAutoRenewal   Boolean         @default(false) // New field: Auto-renewal flag
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Unique constraint to prevent duplicate active subscriptions for the same plan and user/hospital
+  @@unique([userId, hospitalId, planId, endDate], map: "unique_active_subscription")
 }
+
 
 enum Role {
   ADMIN

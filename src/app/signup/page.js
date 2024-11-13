@@ -1,158 +1,167 @@
+// app/signup/page.js
+
 'use client';
-import { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function Signup() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [address, setAddress] = useState('');
-    const [clinicName, setClinicName] = useState('');
-    const [role, setRole] = useState('doctor'); // default role
-    const [city, setCity] = useState('');
-    const [state, setState] = useState('');
-    const [country, setCountry] = useState('');
-    const [message, setMessage] = useState('');
+const SignupPage = () => {
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    city: '',
+    state: '',
+    country: '',
+    address: '',
+    role: 'USER', // Default role can be set to 'USER' or other roles as necessary
+    password: '',
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
-    const handleSignup = async () => {
-        try {
-            const response = await axios.post(`/api/user`, {
-                username,
-                email,
-                password,
-                phone_number: phoneNumber,
-                address,
-                clinic_name: clinicName,
-                role,
-                city,
-                state,
-                country,
-                email_verified: true, // default as verified
-            });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-            if (response.status === 201) {
-                setMessage('Signup successful! You can now login.');
-            }
-        } catch (error) {
-            setMessage(error.response?.data?.error || 'Signup failed');
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="w-full max-w-md space-y-8 p-6 bg-white shadow-lg rounded-lg">
-                <h2 className="text-2xl font-bold text-center text-gray-900">Create Your Account</h2>
-                {message && <p className="text-center text-red-500">{message}</p>}
-                <form className="space-y-4">
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="Username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="Phone Number"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <textarea
-                            placeholder="Address"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="Clinic Name"
-                            value={clinicName}
-                            onChange={(e) => setClinicName(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                            <option value="admin">Admin</option>
-                            <option value="doctor">Doctor</option>
-                            <option value="manager">Manager</option>
-                        </select>
-                    </div>
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="City"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="State"
-                            value={state}
-                            onChange={(e) => setState(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="Country"
-                            value={country}
-                            onChange={(e) => setCountry(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div>
-                        <button
-                            type="button"
-                            onClick={handleSignup}
-                            className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                            Sign Up
-                        </button>
-                    </div>
-                </form>
-                <p className="text-sm text-center text-gray-500 mt-4">
-                    Already have an account?{' '}
-                    <a href="/login" className="text-indigo-600 hover:text-indigo-500">
-                        Log in
-                    </a>
-                </p>
-            </div>
-        </div>
-    );
-}
+    try {
+      const response = await fetch('/api/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message || 'User created successfully!');
+        router.push('/login'); // Redirect to login after successful signup
+      } else {
+        setMessage(data.error || 'Failed to create user.');
+      }
+    } catch (error) {
+      setMessage('An error occurred. Please try again.');
+      console.error('Error submitting signup form:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-100 p-6">
+      {/* Left Side - Signup Form */}
+      <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-8">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Sign Up</h2>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Input Fields */}
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            value={formData.name}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2"
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2"
+            required
+          />
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone"
+            value={formData.phone}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2"
+            required
+          />
+          <input
+            type="text"
+            name="city"
+            placeholder="City"
+            value={formData.city}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2"
+            required
+          />
+          <input
+            type="text"
+            name="state"
+            placeholder="State"
+            value={formData.state}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2"
+            required
+          />
+          <input
+            type="text"
+            name="country"
+            placeholder="Country"
+            value={formData.country}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2"
+            required
+          />
+          <input
+            type="text"
+            name="address"
+            placeholder="Address"
+            value={formData.address}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2"
+            required
+          />
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2"
+            required
+          >
+            
+            <option value="DOCTOR">Doctor</option>
+       
+            {/* Add more roles as needed */}
+          </select>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-4 py-2 col-span-2"
+            required
+          />
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors col-span-2"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
+          </button>
+        </form>
+        {message && <p className="mt-4 text-center text-red-500">{message}</p>}
+      </div>
+
+      {/* Right Side - Image or Illustration */}
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg items-center justify-center">
+        <h2 className="text-4xl font-bold text-white px-6">Join Us Today</h2>
+      </div>
+    </div>
+  );
+};
+
+export default SignupPage;

@@ -58,12 +58,12 @@ const FilterableClinicTable = () => {
     setIsLoading(true);
     try {
       const response = newHospital.id
-        ? await fetch(`http://localhost:3000/api/hospital/add-hospital/${newHospital.id}`, {
+        ? await fetch(`/api/hospital/add-hospital/${newHospital.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newHospital),
           })
-        : await fetch("http://localhost:3000/api/hospital/add-hospital", {
+        : await fetch("/api/hospital/add-hospital", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newHospital),
@@ -96,7 +96,7 @@ const FilterableClinicTable = () => {
   const handleDeleteHospital = async (id) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/api/hospital/add-hospital/${id}`, {
+      const response = await fetch(`/api/hospital/add-hospital/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });

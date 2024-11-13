@@ -23,6 +23,11 @@ export async function POST(request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
+        // Check if the user's email is verified
+        if (!user.isEmailVerified) {
+            return NextResponse.json({ error: 'Please verify your email before logging in' }, { status: 403 });
+        }
+
         // Compare the password with the hashed password stored in the database
         const isPasswordValid = await bcrypt.compare(password, user.password);
 

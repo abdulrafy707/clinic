@@ -24,13 +24,17 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+
+# vercel
+.vercel
+
 # local env files
 .env
 .env.*      # Ignore any file with .env prefix
 *.local     # For any local environment-specific files
 
-# vercel
-.vercel
+
+
 
 # typescript
 *.tsbuildinfo

@@ -44,7 +44,9 @@ async function transcribeWithWhisper(file) {
 async function generateFormattedOutput(transcriptionText, objectiveTemplate) {
   try {
     console.log('Generating formatted output with GPT-4...');
-    const objectiveFields = objectiveTemplate.categories
+    
+    // Check if objectiveTemplate.categories is an array; if not, use an empty array
+    const objectiveFields = (Array.isArray(objectiveTemplate.categories) ? objectiveTemplate.categories : [])
       .map((field) => `- **${field}**: [Value or "Not mentioned"]`)
       .join('\n');
 
@@ -98,15 +100,15 @@ async function generateFormattedOutput(transcriptionText, objectiveTemplate) {
     const data = await response.json();
     const formattedOutput = data.choices[0].message.content;
 
-    // Extract each section from the formatted output
+    // Extract each section from the formatted output using regex patterns
     const subjective = formattedOutput.match(/# \*\*Subjective\*\*\n([\s\S]*?)\n# \*\*Objective\*\*/)?.[1]?.trim() || "Not mentioned";
     const objective = formattedOutput.match(/# \*\*Objective\*\*\n([\s\S]*?)\n# \*\*Assessment\*\*/)?.[1]?.trim() || "Not mentioned";
     const assessment = formattedOutput.match(/# \*\*Assessment\*\*\n([\s\S]*?)\n# \*\*Plan\*\*/)?.[1]?.trim() || "Not mentioned";
     const plan = formattedOutput.match(/# \*\*Plan\*\*\n([\s\S]*)/)?.[1]?.trim() || "Not mentioned";
 
-    // Parse the Objective section based on the template
+    // Parse the Objective section based on the template categories
     const objectiveFieldsParsed = {};
-    objectiveTemplate.categories.forEach((field) => {
+    (Array.isArray(objectiveTemplate.categories) ? objectiveTemplate.categories : []).forEach((field) => {
       objectiveFieldsParsed[field] = objective.match(new RegExp(`- \\*\\*${field}\\*\\*: (.*?)$`, "m"))?.[1]?.trim() || "Not mentioned";
     });
 
