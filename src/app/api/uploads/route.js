@@ -128,6 +128,9 @@ export async function POST(request) {
     const patientName = formData.get('patientName') || null;
     const patientAddress = formData.get('patientAddress') || null;
     const templateId = formData.get('templateId');
+    const noteTitle = formData.get('noteTitle') || null;
+    const attachedFile = formData.get('attachedFile') || null; // Optional attached file
+    const additionalNote = formData.get('additionalNote') || null; // Optional additional note
 
     if (!file) return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     if (!templateId) return NextResponse.json({ error: 'Template ID is required' }, { status: 400 });
@@ -157,9 +160,12 @@ export async function POST(request) {
         filename: file.name || 'recording.webm',
         transcription,
         subjective,
-        objective, // Now stores structured JSON for objective
+        objective,
         assessment,
         plan,
+        note_title: noteTitle,
+        attached_file: attachedFile ? attachedFile.name : null,
+        additional_note: additionalNote,  // Store additional note
         patientName,
         patientAddress,
         userId: parseInt(userId),
@@ -177,7 +183,11 @@ export async function POST(request) {
       objective: JSON.parse(savedRecord.objective),
       assessment: savedRecord.assessment,
       plan: savedRecord.plan,
+      noteTitle: savedRecord.note_title,
+      attachedFile: savedRecord.attached_file,
+      additionalNote: savedRecord.additional_note, // Include additional note in response
     });
+
   } catch (error) {
     console.error('Error during transcription or formatted output generation:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
