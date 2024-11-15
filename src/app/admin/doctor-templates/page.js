@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
@@ -12,7 +13,7 @@ const DoctorTemplatesPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch doctors initially and their template counts
+  // Fetch doctors and their template counts
   useEffect(() => {
     const fetchDoctorsAndTemplateCounts = async () => {
       setIsLoading(true);
@@ -28,13 +29,18 @@ const DoctorTemplatesPage = () => {
         const doctorData = await doctorResponse.json();
         const countData = await countResponse.json();
 
-        setDoctors(doctorData.users || []);
-        
+        // Set template counts
         const counts = {};
         countData.templateCounts.forEach((item) => {
           counts[item.adminId] = item._count.id;
         });
         setDoctorTemplateCounts(counts);
+
+        // Filter doctors to include only those with templates
+        const doctorsWithTemplates = doctorData.users.filter(
+          (doctor) => counts[doctor.id] > 0
+        );
+        setDoctors(doctorsWithTemplates);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to load data. Please try again later.');
@@ -44,12 +50,14 @@ const DoctorTemplatesPage = () => {
     fetchDoctorsAndTemplateCounts();
   }, []);
 
-  // Fetch templates for selected doctor
+  // Fetch templates for the selected doctor
   useEffect(() => {
     const fetchTemplates = async () => {
       if (selectedDoctor) {
         setIsLoading(true);
         setError(null);
+        setTemplates([]); // Clear templates before fetching new ones
+        setFilteredData([]); // Clear filtered data
         try {
           const response = await fetch(`/api/templates?doctorId=${selectedDoctor.id}`);
           if (!response.ok) {
@@ -135,7 +143,6 @@ const DoctorTemplatesPage = () => {
                       ? template.categories.join(', ')
                       : JSON.parse(template.categories).join(', ')}
                   </p>
-                  
                 </div>
               ))
             ) : (
@@ -165,7 +172,7 @@ const DoctorTemplatesPage = () => {
             ))
           ) : (
             <p className="text-gray-500 text-center col-span-full">
-              No doctors found.
+              No doctors with templates found.
             </p>
           )}
         </div>

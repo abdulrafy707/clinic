@@ -11,7 +11,7 @@ import {
   FaClipboard,
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { Feedback } from "@mui/icons-material";
+import { Feedback, Logout, PriceChange, SignpostOutlined } from "@mui/icons-material";
 
 const Sidebar = () => {
   const router = useRouter();
@@ -22,15 +22,15 @@ const Sidebar = () => {
     { label: "Clinics", icon: <FaHospital />, path: "/admin/clinics" },
     { label: "Templates", icon: <FaClipboard />, path: "/admin/TemplatesPage" },
     { label: "Feedback", icon: <Feedback />, path: "/admin/feedback" },
-    { label: "Reports", icon: <FaFileAlt />, path: "/reports" },
-    { label: "Settings", icon: <FaCog />, path: "/settings" },
+    { label: "Pricing Plans", icon: <PriceChange/>, path: "/admin/pricing" },
+    { label: "Sign Out", icon: <Logout/>, path: "/signout" },
   ];
 
   return (
     <aside className="w-64 bg-gradient-to-b from-gray-800 to-gray-900 text-white min-h-screen p-6 flex flex-col justify-between">
       <div>
         <h2 className="text-2xl font-extrabold mb-8 text-center text-blue-400">
-          Clinic
+          ScribeForVet
         </h2>
         <nav className="space-y-3">
           {navItems.map((item, index) => (
