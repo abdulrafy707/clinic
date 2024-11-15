@@ -16,7 +16,7 @@ export default function Home() {
   const audioRef = useRef(null);
 
   // Predefined doctorId and templateId for testing
-  const doctorId = '2';
+  const doctorId = '1';
   const selectedTemplateId = '2';
 
   // Fetch templates for the doctor on component mount

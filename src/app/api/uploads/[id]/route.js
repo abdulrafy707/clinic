@@ -17,6 +17,9 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Transcription not found' }, { status: 404 });
     }
 
+    // Parse objective field if it is stored as a JSON string
+    transcription.objective = transcription.objective ? JSON.parse(transcription.objective) : null;
+
     return NextResponse.json(transcription);
   } catch (error) {
     console.error('Error retrieving transcription:', error);
@@ -26,21 +29,43 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   const { id } = params;
-  const { subjective, objective, assessment, plan, patientName, patientAddress } = await request.json();
+  const {
+    subjective,
+    objective,
+    assessment,
+    plan,
+    patientName,
+    patientAddress,
+    note_title,
+    attached_file,
+    additional_note, // Add additional_note in the data payload
+  } = await request.json();
 
   try {
-    console.log("Received data for update:", { subjective, objective, assessment, plan, patientName, patientAddress });
+    console.log("Received data for update:", {
+      subjective,
+      objective,
+      assessment,
+      plan,
+      patientName,
+      patientAddress,
+      note_title,
+      attached_file,
+      additional_note,
+    });
 
-    // Store objective as JSON string
     const updatedTranscription = await prisma.transcription.update({
       where: { id: parseInt(id) },
       data: {
-        subjective: subjective || undefined,  // Use `undefined` to avoid updating with null if field is omitted
-        objective: objective ? JSON.stringify(objective) : undefined,  // Check for undefined/null objective
+        subjective: subjective || undefined,
+        objective: objective ? JSON.stringify(objective) : undefined,
         assessment: assessment || undefined,
         plan: plan || undefined,
         patientName: patientName || undefined,
         patientAddress: patientAddress || undefined,
+        note_title: note_title || undefined,
+        attached_file: attached_file || undefined,
+        additional_note: additional_note || undefined, // Update additional_note
       },
     });
 
@@ -61,8 +86,6 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'Error updating transcription' }, { status: 500 });
   }
 }
-
-
 
 // DELETE: Delete a transcription by ID
 export async function DELETE(request, { params }) {

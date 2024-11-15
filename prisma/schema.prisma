@@ -81,11 +81,11 @@ model Patient {
 model Transcription {
   id                       Int                  @id @default(autoincrement())
   filename                 String
-  transcription            String
-  subjective               String?
-  objective                String?
-  assessment               String?
-  plan                     String?
+  transcription            String               @db.Text   // Allows unlimited text
+  subjective               String?              @db.Text   // Allows unlimited text
+  objective                String?              @db.Text   // Allows unlimited text
+  assessment               String?              @db.Text   // Allows unlimited text
+  plan                     String?              @db.Text   // Allows unlimited text
   patientId                Int?
   patient                  Patient?             @relation(fields: [patientId], references: [id])
   patientName              String?
@@ -96,7 +96,13 @@ model Transcription {
   updatedAt                DateTime             @updatedAt
   templateId               Int?
   template                 ObjectiveTemplate?   @relation("ObjectiveTemplateTranscriptions", fields: [templateId], references: [id])
+
+  // New fields
+  note_title               String?              // Optional title for the transcription notes
+  attached_file            String?              // Path or URL for an attached file, nullable
+  additional_note          String?               @db.Text 
 }
+
 
 model ObjectiveTemplate {
   id                       Int                  @id @default(autoincrement())
