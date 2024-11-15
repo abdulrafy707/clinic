@@ -1,20 +1,14 @@
-'use client';
-import React, { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
+import Link from 'next/link'
+import Hero from '@/components/Hero'
+import Navigation from '@/components/Navigation'
+import StatsAndFeatures from '@/components/StatsAndFeatures'
+import { AnnouncementBanner } from '@/components/AnnouncementBanner'
+import FeaturesSection from '@/components/FeaturesSection'
 
-export default function Home() {
-  const [result, setResult] = useState(null);
-  const [recording, setRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [audioChunks, setAudioChunks] = useState([]);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [patientName, setPatientName] = useState('');
-  const [patientAddress, setPatientAddress] = useState('');
-  const [templates, setTemplates] = useState([]);
-  const audioRef = useRef(null);
+export default function HomePage() {
 
+<<<<<<< HEAD
+=======
   // Predefined doctorId and templateId for testing
   const doctorId = '1';
   const selectedTemplateId = '2';
@@ -161,113 +155,15 @@ export default function Home() {
       setUploadedFile(null);
     }
   };
+>>>>>>> be7b3cb5cd7ee7013e5cf7ebc8d8e756d8398f1f
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Record or Upload Audio for Transcription</h1>
-
-      <div className="mb-4">
-        <label className="block mb-2">Patient Name (Optional)</label>
-        <input
-          type="text"
-          value={patientName}
-          onChange={(e) => setPatientName(e.target.value)}
-          className="border p-2 rounded w-full"
-          placeholder="Enter patient name"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block mb-2">Patient Address (Optional)</label>
-        <input
-          type="text"
-          value={patientAddress}
-          onChange={(e) => setPatientAddress(e.target.value)}
-          className="border p-2 rounded w-full"
-          placeholder="Enter patient address"
-        />
-      </div>
-
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Choose an option:</h2>
-        <div className="flex items-center mb-2">
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={handleFileUpload}
-            className="mr-2"
-          />
-          <span className="text-gray-600">Upload audio file from device</span>
-        </div>
-        <div className="flex items-center">
-          {!recording ? (
-            <button
-              onClick={handleStartRecording}
-              className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-            >
-              Start Recording
-            </button>
-          ) : (
-            <button
-              onClick={handleStopRecording}
-              className="bg-red-500 text-white px-4 py-2 rounded mr-2"
-            >
-              Stop Recording
-            </button>
-          )}
-          <span className="text-gray-600">or Record new audio</span>
-        </div>
-      </div>
-
-      {(audioChunks.length > 0 || uploadedFile) && (
-        <div className="mt-4">
-          <h3 className="font-semibold">Audio Preview:</h3>
-          <audio ref={audioRef} controls />
-          <button
-            onClick={handleUpload}
-            className="mt-2 bg-green-500 text-white px-4 py-2 rounded"
-          >
-            Upload and Transcribe
-          </button>
-        </div>
-      )}
-
-      {loading && <p className="text-blue-600">Transcribing...</p>}
-      {error && <p className="text-red-600">Error: {error}</p>}
-      {result && (
-        <div>
-          <h3 className="mt-4 font-semibold">Transcription:</h3>
-          <textarea
-            value={result.transcription}
-            readOnly
-            rows={10}
-            className="w-full border p-2 rounded"
-          />
-
-          <h3 className="mt-4 font-semibold">Formatted Output:</h3>
-          <div className="prose prose-lg">
-            <ReactMarkdown>{result.formattedOutput}</ReactMarkdown>
-          </div>
-
-          <h3 className="mt-4 font-semibold">Subjective:</h3>
-          <p>{result.subjective}</p>
-
-          <h3 className="mt-4 font-semibold">Objective:</h3>
-          <ul>
-            {Object.entries(result.objective).map(([key, value]) => (
-              <li key={key}>
-                <strong>{key}:</strong> {value}
-              </li>
-            ))}
-          </ul>
-
-          <h3 className="mt-4 font-semibold">Assessment:</h3>
-          <p>{result.assessment}</p>
-
-          <h3 className="mt-4 font-semibold">Plan:</h3>
-          <p>{result.plan}</p>
-        </div>
-      )}
+    <div className="bg-gray-50">
+      <AnnouncementBanner />
+      <Navigation />
+      <Hero />
+      <StatsAndFeatures />
+      <FeaturesSection />
     </div>
-  );
+  )
 }
