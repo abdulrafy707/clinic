@@ -48,7 +48,7 @@ export async function PUT(request, { params }) {
       where: { id: parseInt(id) },
       data: {
         name,
-        categories: JSON.stringify(categories), // Store as JSON
+        categories, // Store as JSON string
         admin: { connect: { id: parseInt(adminId) } },
       },
     });
@@ -58,7 +58,7 @@ export async function PUT(request, { params }) {
       template: {
         id: updatedTemplate.id,
         name: updatedTemplate.name,
-        categories: JSON.parse(updatedTemplate.categories),
+        categories: categories, // Send back categories as array
         adminId: updatedTemplate.adminId,
         updatedAt: updatedTemplate.updatedAt,
       },

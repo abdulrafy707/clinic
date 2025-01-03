@@ -2,6 +2,8 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '../../../../../lib/prisma'; // Adjust the import path as needed
+import fs from 'fs/promises';
+import path from 'path';
 
 export const runtime = 'nodejs'; // Ensure the API route runs in Node.js runtime
 
@@ -29,53 +31,75 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   const { id } = params;
-  const {
-    subjective,
-    objective,
-    assessment,
-    plan,
-    patientName,
-    patientAddress,
-    note_title,
-    attached_file,
-    additional_note, // Add additional_note in the data payload
-  } = await request.json();
 
   try {
-    console.log("Received data for update:", {
-      subjective,
-      objective,
-      assessment,
-      plan,
-      patientName,
-      patientAddress,
-      note_title,
-      attached_file,
-      additional_note,
-    });
+    // Parse the form data
+    const formData = await request.formData();
 
+    // Extract fields from form data
+    const subjective = formData.get('subjective');
+    const objective = formData.get('objective');
+    const assessment = formData.get('assessment');
+    const plan = formData.get('plan');
+    const patientName = formData.get('patientName');
+    const patientAddress = formData.get('patientAddress');
+    const note_title = formData.get('note_title');
+    const additional_note = formData.get('additional_note');
+    const attached_file = formData.get('attached_file');
+    const attached_file_url_form = formData.get('attached_file_url');
+
+    let attached_file_url = null;
+
+    // Handle attached file upload
+    if (attached_file && attached_file.size > 0) {
+      // Read the file content
+      const buffer = Buffer.from(await attached_file.arrayBuffer());
+      const fileName = attached_file.name;
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+
+      // Ensure the upload directory exists
+      await fs.mkdir(uploadDir, { recursive: true });
+      const filePath = path.join(uploadDir, fileName);
+
+      // Write the file to the upload directory
+      await fs.writeFile(filePath, buffer);
+      attached_file_url = `/uploads/${fileName}`;
+    } else if (attached_file_url_form) {
+      // Use existing attached file URL if no new file is uploaded
+      attached_file_url = attached_file_url_form;
+    }
+
+    // Handle objective field
+    let parsedObjective = undefined;
+    if (objective) {
+      try {
+        parsedObjective = JSON.stringify(JSON.parse(objective));
+      } catch (e) {
+        parsedObjective = undefined;
+      }
+    }
+
+    // Update the transcription in the database
     const updatedTranscription = await prisma.transcription.update({
       where: { id: parseInt(id) },
       data: {
         subjective: subjective || undefined,
-        objective: objective ? JSON.stringify(objective) : undefined,
+        objective: parsedObjective,
         assessment: assessment || undefined,
         plan: plan || undefined,
         patientName: patientName || undefined,
         patientAddress: patientAddress || undefined,
         note_title: note_title || undefined,
-        attached_file: attached_file || undefined,
-        additional_note: additional_note || undefined, // Update additional_note
+        attached_file: attached_file_url || undefined,
+        additional_note: additional_note || undefined,
       },
     });
-
-    console.log("Updated transcription from Prisma:", updatedTranscription);
 
     return NextResponse.json({
       message: 'Transcription updated successfully',
       transcription: {
         ...updatedTranscription,
-        objective: JSON.parse(updatedTranscription.objective || "{}"), // Parse JSON for response if exists
+        objective: updatedTranscription.objective ? JSON.parse(updatedTranscription.objective) : {},
       },
     });
   } catch (error) {

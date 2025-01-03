@@ -31,6 +31,11 @@ const FilterableObjectiveTemplateTable = ({ templates, fetchTemplates }) => {
     }
     setIsLoading(true);
     try {
+      // Clean and split categories
+      const cleanedCategories = newTemplate.categories
+        .split(',')
+        .map((category) => category.trim().replace(/^['"]+|['"]+$/g, ''));
+
       const response = newTemplate.id
         ? await fetch(`/api/objective-tempelates/${newTemplate.id}`, {
             method: 'PUT',
@@ -39,18 +44,18 @@ const FilterableObjectiveTemplateTable = ({ templates, fetchTemplates }) => {
             },
             body: JSON.stringify({
               name: newTemplate.name,
-              categories: newTemplate.categories.split(','), // convert to array
+              categories: cleanedCategories, // Send as array
               adminId: newTemplate.adminId,
             }),
           })
-        : await fetch('/api/objective-tempelates', {
+        : await fetch('/api/objective-templates', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               name: newTemplate.name,
-              categories: newTemplate.categories.split(','), // convert to array
+              categories: cleanedCategories, // Send as array
               adminId: newTemplate.adminId,
             }),
           });
@@ -95,10 +100,14 @@ const FilterableObjectiveTemplateTable = ({ templates, fetchTemplates }) => {
   };
 
   const handleEditTemplate = (template) => {
+    const categoriesArray = Array.isArray(template.categories)
+      ? template.categories
+      : JSON.parse(template.categories);
+
     setNewTemplate({
       id: template.id,
       name: template.name,
-      categories: Array.isArray(template.categories) ? template.categories.join(', ') : template.categories, // Ensure it's a string
+      categories: categoriesArray.join(', '), // Convert array to comma-separated string
       adminId: template.adminId,
     });
     setIsModalOpen(true);

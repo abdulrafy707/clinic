@@ -4,9 +4,20 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+
+const steps = [
+  { title: 'Account', fields: ['name', 'email', 'password'] },
+  { title: 'Personal', fields: ['phone'] },
+  { title: 'Clinic', fields: ['address', 'city', 'state'] },
+]
 
 export default function SignupPage() {
   const router = useRouter()
+  const [currentStep, setCurrentStep] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -16,7 +27,6 @@ export default function SignupPage() {
     phone: '',
     city: '',
     state: '',
-    country: '',
     address: '',
     role: 'DOCTOR',
     password: '',
@@ -29,6 +39,11 @@ export default function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1)
+      return
+    }
+
     setIsLoading(true)
     setMessage('')
 
@@ -57,205 +72,248 @@ export default function SignupPage() {
     }
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="grid w-full max-w-6xl gap-8 rounded-2xl bg-white p-8 shadow-xl md:grid-cols-2 md:p-12">
-        {/* Left Side - Content */}
-        <div className="flex flex-col justify-center">
-          <Link href="/" className="mb-12 text-2xl font-bold text-indigo-600">
-            Scribenote
-          </Link>
-          
-          <h1 className="mb-4 text-4xl font-bold text-gray-900">
-            You&apos;re 20 seconds away from totally automatic medical records 🎉
-          </h1>
-          
-          <div className="space-y-4 text-gray-600">
-            <p className="flex items-center gap-2">
-              ✨ Get 50 free Automatic Medical Records just by signing up.
-            </p>
-            <p className="flex items-center gap-2">
-              🎯 We&apos;ll make it easy for you - no demo, onboarding call, or credit card is required!
-            </p>
-            <p className="flex items-center gap-2">
-              💬 If you need help though, please contact us!
-            </p>
-          </div>
+  const currentFields = steps[currentStep].fields
 
-          <div className="mt-8">
-            <p className="text-sm text-gray-500">
-              Already have an account?{' '}
-              <Link href="/login" className="text-indigo-600 hover:text-indigo-500">
-                Sign In
-              </Link>
-            </p>
-          </div>
+  return (
+    <div className="min-h-screen bg-[#F8F9FF] px-4 py-8 md:px-8 md:py-12">
+      <div className="mx-auto max-w-[420px] space-y-6">
+        <div className="mx-auto h-14 w-14 rounded-2xl bg-[#EEF1FF] flex items-center justify-center">
+          <span className="text-xl font-bold">N</span>
         </div>
 
-        {/* Right Side - Form */}
-        <div className="flex flex-col justify-center">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Full Name
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="Dr. Jane Smith"
-                />
+        <div className="rounded-[26px] bg-[#f5f5f5] p-1.5">
+          <Card className="rounded-[20px] shadow-lg">
+            <CardContent className="p-6 space-y-6">
+              <div className="text-center space-y-2">
+                <h1 className="text-2xl font-semibold">
+                  Create an account
+                </h1>
+                <p className="text-base text-gray-500">
+                  Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+                </p>
               </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="jane@clinic.com"
-                />
+
+              <div className="flex justify-between mb-4">
+                {steps.map((step, index) => (
+                  <div
+                    key={step.title}
+                    className={`w-1/3 h-1 rounded ${index <= currentStep ? 'bg-black' : 'bg-gray-200'
+                      }`}
+                  />
+                ))}
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                placeholder="(555) 555-5555"
-              />
-            </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {currentFields.includes('name') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-gray-600">
+                      Full Name
+                    </Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      type="text"
+                      placeholder="Dr. Jane Smith"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="h-12 border-gray-200"
+                      required
+                    />
+                  </div>
+                )}
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                  City
-                </label>
-                <input
-                  id="city"
-                  name="city"
-                  type="text"
-                  required
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="San Francisco"
-                />
-              </div>
-              <div>
-                <label htmlFor="state" className="block text-sm font-medium text-gray-700">
-                  State
-                </label>
-                <input
-                  id="state"
-                  name="state"
-                  type="text"
-                  required
-                  value={formData.state}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="California"
-                />
-              </div>
-            </div>
+                {currentFields.includes('email') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-600">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="jane@clinic.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="h-12 border-gray-200"
+                      required
+                    />
+                  </div>
+                )}
 
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Clinic Address
-              </label>
-              <input
-                id="address"
-                name="address"
-                type="text"
-                required
-                value={formData.address}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                placeholder="123 Medical Center Dr"
-              />
-            </div>
+                {currentFields.includes('password') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-gray-600">
+                      Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="h-12 border-gray-200"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="relative mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-10 text-gray-900 placeholder-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
+                {currentFields.includes('phone') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-gray-600">
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      placeholder="(555) 555-5555"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="h-12 border-gray-200"
+                      required
+                    />
+                  </div>
+                )}
+
+                {currentFields.includes('address') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="text-gray-600">
+                      Clinic Address
+                    </Label>
+                    <Input
+                      id="address"
+                      name="address"
+                      type="text"
+                      placeholder="123 Medical Center Dr"
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="h-12 border-gray-200"
+                      required
+                    />
+                  </div>
+                )}
+
+                {currentFields.includes('city') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="city" className="text-gray-600">
+                      City
+                    </Label>
+                    <Input
+                      id="city"
+                      name="city"
+                      type="text"
+                      placeholder="San Francisco"
+                      value={formData.city}
+                      onChange={handleChange}
+                      className="h-12 border-gray-200"
+                      required
+                    />
+                  </div>
+                )}
+
+                {currentFields.includes('state') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="state" className="text-gray-600">
+                      State
+                    </Label>
+                    <Input
+                      id="state"
+                      name="state"
+                      type="text"
+                      placeholder="California"
+                      value={formData.state}
+                      onChange={handleChange}
+                      className="h-12 border-gray-200"
+                      required
+                    />
+                  </div>
+                )}
+
+                {message && (
+                  <p className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+                    {message}
+                  </p>
+                )}
+
+                <div className="flex justify-between gap-4">
+                  {currentStep > 0 && (
+                    <Button
+                      type="button"
+                      onClick={() => setCurrentStep(currentStep - 1)}
+                      className="h-12 flex-1 bg-gray-200 text-black hover:bg-gray-300"
+                    >
+                      Previous
+                    </Button>
                   )}
-                </button>
-              </div>
-            </div>
-
-            {message && (
-              <p className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
-                {message}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="relative w-full rounded-lg bg-indigo-600 px-8 py-3 text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Creating your account...
+                  <Button
+                    type="submit"
+                    className="h-12 flex-1 bg-black font-medium text-white hover:bg-black/90"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creating...
+                      </span>
+                    ) : currentStep === steps.length - 1 ? (
+                      'Create Account'
+                    ) : (
+                      'Next'
+                    )}
+                  </Button>
+                </div>
+              </form>
+              <div className="py-1.5 text-center text-[14px]">
+                <span className="text-gray-500">
+                  By signing up, you agree to our{' '}
                 </span>
-              ) : (
-                'Create Account'
-              )}
-            </button>
+                <Link
+                  href="/terms"
+                  className="font-semibold text-black hover:underline"
+                >
+                  Terms of Service
+                </Link>
+                <span className="text-gray-500"> and </span>
+                <Link
+                  href="/privacy"
+                  className="font-semibold text-black hover:underline"
+                >
+                  Privacy Policy
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
 
-            <p className="text-center text-sm text-gray-500">
-              By signing up, you agree to our{' '}
-              <Link href="/terms" className="text-indigo-600 hover:text-indigo-500">
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link href="/privacy" className="text-indigo-600 hover:text-indigo-500">
-                Privacy Policy
-              </Link>
-            </p>
-          </form>
+          <div className="py-1.5 text-center text-[15px]">
+            <span className="text-gray-500">
+              Already have an account?{' '}
+            </span>
+            <Link
+              href="/login"
+              className="font-semibold text-black hover:underline"
+            >
+              Log in
+            </Link>
+          </div>
+
+
         </div>
       </div>
     </div>
   )
 }
+

@@ -14,9 +14,12 @@ const TemplatesPage = () => {
       setIsLoading(true);
       try {
         const [adminRes, doctorRes] = await Promise.all([
-          fetch('/api/objective-tempelates').then((res) => res.json()), 
-          fetch('/api/templates').then((res) => res.json()), 
+          fetch('/api/objective-tempelates').then((res) => res.json()),
+          fetch('/api/templates').then((res) => res.json()),
         ]);
+
+        console.log("Fetched Admin Templates:", adminRes.templates); // Log admin templates
+        console.log("Fetched Doctor Templates:", doctorRes.templates); // Log doctor templates
 
         setAdminTemplates(adminRes.templates || []);
         setDoctorTemplates(doctorRes.templates || []);

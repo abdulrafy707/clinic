@@ -21,25 +21,33 @@ const DoctorTemplatesPage = () => {
       try {
         const doctorResponse = await fetch('/api/user?role=DOCTOR');
         const countResponse = await fetch('/api/templates/count-per-doctor');
-
+    
         if (!doctorResponse.ok || !countResponse.ok) {
           throw new Error('Failed to fetch data');
         }
-
+    
         const doctorData = await doctorResponse.json();
         const countData = await countResponse.json();
-
+    
+        // Debugging counts
+        console.log('Doctor Data:', doctorData.users);
+        console.log('Template Counts Data:', countData.templateCounts);
+    
         // Set template counts
         const counts = {};
         countData.templateCounts.forEach((item) => {
           counts[item.adminId] = item._count.id;
         });
-        setDoctorTemplateCounts(counts);
-
+    
+        console.log('Counts Mapped to Doctors:', counts);
+    
         // Filter doctors to include only those with templates
         const doctorsWithTemplates = doctorData.users.filter(
           (doctor) => counts[doctor.id] > 0
         );
+        console.log('Filtered Doctors With Templates:', doctorsWithTemplates);
+    
+        setDoctorTemplateCounts(counts);
         setDoctors(doctorsWithTemplates);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -47,6 +55,7 @@ const DoctorTemplatesPage = () => {
       }
       setIsLoading(false);
     };
+    
     fetchDoctorsAndTemplateCounts();
   }, []);
 
@@ -60,10 +69,12 @@ const DoctorTemplatesPage = () => {
         setFilteredData([]); // Clear filtered data
         try {
           const response = await fetch(`/api/templates?doctorId=${selectedDoctor.id}`);
+          console.log("API Request URL:", `/api/templates?doctorId=${selectedDoctor.id}`); // Log the request URL
           if (!response.ok) {
             throw new Error(`Failed to fetch templates for doctor with ID: ${selectedDoctor.id}`);
           }
           const data = await response.json();
+          console.log("Fetched Templates Data:", data); // Log the fetched data
           setTemplates(data.templates || []);
           setFilteredData(data.templates || []);
         } catch (error) {
@@ -75,6 +86,7 @@ const DoctorTemplatesPage = () => {
     };
     fetchTemplates();
   }, [selectedDoctor]);
+  
 
   // Filter templates based on search input
   useEffect(() => {

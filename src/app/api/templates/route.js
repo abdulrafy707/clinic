@@ -32,27 +32,17 @@ export async function GET(request) {
   const doctorId = searchParams.get('doctorId');
 
   try {
-    // If doctorId is provided, filter templates by doctorId
+    // Ensure only templates with the specified doctorId are fetched
     const templates = doctorId
       ? await prisma.objectiveTemplate.findMany({
           where: { doctorId: parseInt(doctorId) },
         })
-      : await prisma.objectiveTemplate.findMany(); // Otherwise, return all templates
+      : await prisma.objectiveTemplate.findMany(); // Fetch all templates if no doctorId is provided
 
+    console.log("Filtered Templates by doctorId:", templates);
     return NextResponse.json({ templates }, { status: 200 });
   } catch (error) {
     console.error("Error fetching templates:", error);
     return NextResponse.json({ error: 'Failed to retrieve templates' }, { status: 500 });
   }
 }
- 
-
-// export async function GET(request) {
-//   try {
-//     const templates = await prisma.objectiveTemplate.findMany(); // Use the correct model name here
-//     return NextResponse.json({ templates }, { status: 200 });
-//   } catch (error) {
-//     console.error("Fetching error:", error);
-//     return NextResponse.json({ error: 'Failed to retrieve templates' }, { status: 500 });
-//   }
-// }

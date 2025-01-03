@@ -5,6 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -28,14 +32,10 @@ export default function Login() {
 
       if (response.status === 200) {
         const { token, user } = response.data
-
-        // Store JWT token in localStorage (or cookies, depending on your preference)
         localStorage.setItem('authToken', token)
-
+        localStorage.setItem('userId', user.id)
         setMessage('Login successful')
-
-        // Redirect to the home page or dashboard after successful login
-        router.push('/home')
+        router.push('/dashboard')
       }
     } catch (error) {
       setMessage(error.response?.data?.error || 'Login failed')
@@ -45,113 +45,120 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white md:p-4">
-      <div className="w-full max-w-[550px] space-y-6 p-3 md:p-8 md:rounded-xl md:shadow-md md:bg-white md:shadow-indigo-100">
-        <div>
-          <Link href="/" className="mb-6 block text-center text-2xl font-bold text-indigo-600">
-            Scribe
-          </Link>
-          <h2 className="text-center text-4xl font-bold text-gray-900">
-            Log in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-              create a new account
-            </Link>
-          </p>
+    <div className="min-h-screen bg-[#F8F9FF] px-4 py-8 md:px-8 md:py-12">
+      <div className="mx-auto max-w-[420px] space-y-6">
+        <div className="mx-auto h-14 w-14 rounded-2xl bg-[#EEF1FF] flex items-center justify-center">
+          <span className="text-xl font-bold">N</span>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="space-y-4 rounded-md shadow-sm">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="relative block w-full appearance-none rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                placeholder="Email address"
-              />
-            </div>
-            <div className="relative">
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="relative block w-full appearance-none rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                placeholder="Password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
+
+        <div className="rounded-[26px] bg-[#f5f5f5] p-1.5">
+          <Card className="rounded-[20px] shadow-lg">
+            <CardContent className="p-6 space-y-6">
+              <div className="text-center space-y-2">
+                <h1 className="text-2xl font-semibold">
+                  Welcome back!
+                </h1>
+                <p className="text-base text-gray-500">
+                  Please enter your details to login.
+                </p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-600">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="youremail@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-12 border-gray-200"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-gray-600">
+                      Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="h-12 border-gray-200"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {message && (
+                  <p className={`text-sm ${message.includes('successful') ? 'text-green-600' : 'text-red-600'}`}>
+                    {message}
+                  </p>
                 )}
-              </button>
-            </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
+                <Button
+                  type="submit"
+                  className="h-12 w-full bg-black font-medium text-white hover:bg-black/90"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Logging in...
+                    </span>
+                  ) : (
+                    'Login with email'
+                  )}
+                </Button>
 
-            <div className="text-sm">
-              <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
+                <div className="text-center text-[15px]">
+                  <span className="text-gray-500">
+                    Forgot your password?{' '}
+                  </span>
+                  <Link
+                    href="/forgot-password"
+                    className="font-semibold text-black hover:underline"
+                  >
+                    Reset it
+                  </Link>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
 
-          {message && (
-            <p className={`text-sm ${message.includes('successful') ? 'text-green-600' : 'text-red-600'}`}>
-              {message}
-            </p>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          <div className="py-1.5 text-center text-[15px]">
+            <span className="text-gray-500">
+              Don't have an account?{' '}
+            </span>
+            <Link
+              href="/signup"
+              className="font-semibold text-black hover:underline"
             >
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Logging in...
-                </span>
-              ) : (
-                'Log in'
-              )}
-            </button>
+              Register
+            </Link>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )
 }
+

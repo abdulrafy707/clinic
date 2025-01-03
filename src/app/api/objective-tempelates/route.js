@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
 export async function POST(request) {
   try {
-    const body = await request.text();
-    const { name, categories, adminId } = JSON.parse(body); // Extract data from request body
+    const body = await request.json(); // Parse JSON body
+    const { name, categories, adminId } = body; // Extract data from request body
 
     // Check for missing fields
     if (!name || !categories || !adminId) {
@@ -23,7 +23,7 @@ export async function POST(request) {
     const newTemplate = await prisma.objectiveTemplate.create({
       data: {
         name,
-        categories: JSON.stringify(categories), // Store as JSON
+        categories, // Store as JSON string
         admin: { connect: { id: parseInt(adminId) } }, // Link to the admin
       },
     });
@@ -33,7 +33,7 @@ export async function POST(request) {
       template: {
         id: newTemplate.id,
         name: newTemplate.name,
-        categories: JSON.parse(newTemplate.categories),
+        categories: categories, // Send back the categories as array
         adminId: newTemplate.adminId,
         createdAt: newTemplate.createdAt,
       },

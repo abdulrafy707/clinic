@@ -5,7 +5,8 @@ import prisma from '../../../../../lib/prisma';
 export async function GET() {
   try {
     const templateCounts = await prisma.objectiveTemplate.groupBy({
-      by: ['adminId'],
+      by: ['doctorId'], // Group by doctorId instead of adminId
+      where: { doctorId: { not: null } }, // Exclude templates with null doctorId
       _count: { id: true },
     });
 
@@ -15,3 +16,4 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal Server Error: ' + error.message }, { status: 500 });
   }
 }
+
